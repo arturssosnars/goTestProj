@@ -2,6 +2,24 @@ package DataModules
 
 import "encoding/xml"
 
+// 1. Mums neinteresē visi lauki, kas tiek atgriezti šajā XML, tikai publikācijas datums un kursu strings.
+// 2. Mums interesējošai apakšstruktūrai `Item` var definēt atsevišķu struktu.
+//
+// type Item struct {
+//     RawRates string `xml:"description"`
+//     PubDate string `xml:"pubDate"`
+// }
+//
+// Ieguvums būtu tāds, ka mēs varētu definēt metodes uz šī strukta, kas atvieglotu ar šo struktu saistītas
+// datu apstrādes darbības, kas vairākās vietās tiek veiktas.
+//
+// func (i Item) PubDateTime() (time.Time, error) {
+//     t, err := time.Parse(i.PubDate)
+//     if err != nil {
+//         return nil, err
+//     }
+//     return t, nil
+// }
 type Rss struct {
 	XMLName xml.Name `xml:"rss"`
 	Text    string   `xml:",chardata"`

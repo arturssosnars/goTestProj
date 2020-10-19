@@ -19,6 +19,8 @@ func AddRatesToDB() {
 		log.Fatal(error)
 	}
 
+	// būtu jauki, ja mēs varētu vienkārši paprasīt bankData.Channel.Item.Rates(),
+	// un tas atgrieztu slice ar kursu vērtību structiem
 	rawRatesArray := strings.Split(bankData.Channel.Item[index].Description, " ")
 
 	rates := parseXmlToStruct(rawRatesArray[:len(rawRatesArray)-1], bankData, index)
@@ -30,6 +32,9 @@ func AddRatesToDB() {
 	LogErrorIfNeeded(err)
 }
 
+// Tā vietā, lai veiktu darbības ar RSS struktu šeit, var definēt receiver metodes, lai mēs pašam struktam varētu pajautāt
+// Rates un formatētu PubDate.
+// Skatīt komentārus rss.go failā
 func parseXmlToStruct(rawRatesArray []string, bankData dataModules.Rss, index int) dataModules.ResponseData {
 	rates := dataModules.ResponseData{}
 	layout := "Mon, 02 Jan 2006 03:04:05 -0700"
