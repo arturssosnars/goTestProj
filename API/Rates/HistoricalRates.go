@@ -1,16 +1,20 @@
 package Rates
 
 import (
+	"database/sql"
 	"encoding/json"
 	zlog "github.com/rs/zerolog/log"
-	"goTestProj/API/Initialization"
 	dataModules "goTestProj/DataModules"
 	customError "goTestProj/Error"
 	"net/http"
 	"time"
 )
 
-func RespondWithHistoricalData(w http.ResponseWriter, r *http.Request) {
+type Database struct {
+	Database *sql.DB
+}
+
+func (db Database) RespondWithHistoricalData(w http.ResponseWriter, r *http.Request) {
 	currency := r.URL.Query().Get("currency")
 
 	if len(currency) != 3 {
@@ -26,7 +30,7 @@ func RespondWithHistoricalData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rates, err := getCurrencyHistoricalRates(currency)
+	rates, err := db.getCurrencyHistoricalRates(currency)
 
 	if err != nil {
 		zlog.Error().Err(err).Msg("Failed to get rates from database")
@@ -46,10 +50,10 @@ func RespondWithHistoricalData(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getCurrencyHistoricalRates(currency string) ([]dataModules.HistoricalRate, error) {
+func (db Database) getCurrencyHistoricalRates(currency string) ([]dataModules.HistoricalRate, error) {
 	var data []dataModules.HistoricalRate
 
-	rows, err := Initialization.Db.Query("SELECT rate, pubdate FROM rates WHERE currency=$1", currency)
+	rows, err := db.Database.Query("SELECT rate, pubdate FROM rates WHERE currency=$1", currency)
 
 	if err != nil {
 		return nil, err

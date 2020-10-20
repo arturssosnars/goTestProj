@@ -2,7 +2,6 @@ package Initialization
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/lib/pq"
 	zlog "github.com/rs/zerolog/log"
@@ -11,13 +10,8 @@ import (
 	"goTestProj/Tasks"
 	"log"
 	"net/http"
+	config "goTestProj/Config"
 )
-
-// globāli mainīgie nav laba prakse, bet to noteikti zināji :)
-// Iezīme A1: tā vietā, lai rakstītu http.Handler funkcijas, kas paļaujas uz globālu mainīgo,
-// tu varētu izveidot structu, kas satur fieldu ar *sql.DB, un realizē visas nepieciešamās http.HandlerFunc
-// kā receiver metodes.
-var Db *sql.DB
 
 func Initialize() {
 	// Iztēlosimies programma logo šādas rindas:
@@ -28,60 +22,64 @@ func Initialize() {
 	// uz kādu hostu, kādu portu, un kādu datubāzi programma cenšas savienoties, lai varētu pārliecināties, ka
 	// problēma nav ar programmu vai tās konfigurāciju.
 	// Logošanai iesaku lietot zerolog: https://github.com/rs/zerolog
-	fmt.Println("init db")
 
 	// Hardkodēt resursu parametrus nav laba prakse, bet to noteikti zināji :)
 	// Šim nolūkam ieteicu viper bibliotēku: https://github.com/spf13/viper
-	pgUrl, err := pq.ParseURL("postgres://pxjcqhji:MPY070OmuT4xUosjTGTWaHGH3jHCqJOY@hattie.db.elephantsql.com:5432/pxjcqhji")
+	var db *sql.DB
+
+	config.Init()
+	postgres := config.Postgres()
+	url := postgres.Url + ":" + postgres.Port + "/" + postgres.Database
+
+	pgUrl, err := pq.ParseURL(url)
 
 	// skatīt komentārus pie funkcijas definīcijas
 	if err != nil {
 		zlog.Error().Err(err).
-			Str("type", "postgres").
-			Str("url", "MPY070OmuT4xUosjTGTWaHGH3jHCqJOY@hattie.db.elephantsql.com").
-			Str("port", "5432").
-			Str("db", "pxjcqhji").
+			Str("url", postgres.Url).
+			Str("port", postgres.Port).
+			Str("db", postgres.Database).
 			Msg("Failed to parse database URL")
 	}
 
-	Db, err = sql.Open("postgres", pgUrl)
+	db, err = sql.Open(postgres.Driver, pgUrl)
 
 	if err != nil {
 		zlog.Error().Err(err).
-			Str("driverName", "postgres").
-			Str("type", "postgres").
-			Str("url", "MPY070OmuT4xUosjTGTWaHGH3jHCqJOY@hattie.db.elephantsql.com").
-			Str("port", "5432").
-			Str("db", "pxjcqhji").
+			Str("driverName", postgres.Driver).
+			Str("url", postgres.Url).
+			Str("port", postgres.Port).
+			Str("db", postgres.Database).
 			Msg("Failed to open database")
 	}
 
-	err = Db.Ping()
+	err = db.Ping()
 	if err != nil {
 		zlog.Error().Err(err).
-			Str("driverName", "postgres").
-			Str("type", "postgres").
-			Str("url", "MPY070OmuT4xUosjTGTWaHGH3jHCqJOY@hattie.db.elephantsql.com").
-			Str("port", "5432").
-			Str("db", "pxjcqhji").
+			Str("driverName", postgres.Driver).
+			Str("url", postgres.Url).
+			Str("port", postgres.Port).
+			Str("db", postgres.Database).
 			Msg("Failed to verify connection with database")
 	}
 
 	// Redzu, ka pirms servera uzstartēšanas, tu veic valūtas kursa vērtību sinhronizāciju, nevis realizē to kā
 	// atsevišķu CLI komandu. Nekas, ar šo tiksim galā :)
 	// Problēma ar šo pieeju ir tāda, ka, gadījumā, ja latvijas bankas rss feeds ir down, serveri nav iespējams uzstartēt.
-	SaveData.AddRatesToDB()
+	saveDatabase := SaveData.Database{db}
+	saveDatabase.AddRatesToDB()
 
+	respondDatabase := rates.Database{db}
 	router := chi.NewRouter()
-	router.HandleFunc("/all", rates.RespondWithLatestRates)
-	router.HandleFunc("/single", rates.RespondWithHistoricalData)
+	router.HandleFunc("/all", respondDatabase.RespondWithLatestRates)
+	router.HandleFunc("/single", respondDatabase.RespondWithHistoricalData)
 
 	log.Println("set timers for tasks")
 
-	// skatīt komentāru pie funkcijas
-	go Tasks.SetTaskForAddingRates()
+	taskDatabase := Tasks.Database{db}
+	go taskDatabase.SetTaskForAddingRates()
 
-	// hardkodēts ports
-	log.Println("Listen to port :8000...")
-	log.Fatal(http.ListenAndServe(":8000", router))
+	port := ":" + config.Api().Port
+	log.Println("Listen to port " + port + "...")
+	log.Fatal(http.ListenAndServe(port, router))
 }

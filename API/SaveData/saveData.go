@@ -5,16 +5,20 @@ import (
 	"encoding/xml"
 	"fmt"
 	zlog "github.com/rs/zerolog/log"
-	"goTestProj/API/Initialization"
+	config "goTestProj/Config"
 	dataModules "goTestProj/DataModules"
 	customError "goTestProj/Error"
 	"net/http"
 )
 
+type Database struct {
+	Database *sql.DB
+}
+
 func GetBankRates() (dataModules.Rss, error) {
 	var bankData dataModules.Rss
-	// hardkodēts resursa parametrs
-	resp, err := http.Get("https://www.bank.lv/vk/ecb_rss.xml")
+	bankUrl := config.Bank().Url
+	resp, err := http.Get(bankUrl)
 
 	if err != nil {
 		err = customError.BankApiError()
@@ -31,14 +35,16 @@ func GetBankRates() (dataModules.Rss, error) {
 	return bankData, nil
 }
 
-func AddRatesToDB() {
+func (db Database) AddRatesToDB() error {
 	bankData, err := GetBankRates()
 
 	if err != nil {
 		if err == customError.ParsingError() {
 			zlog.Error().Err(err).Msg("Failed to parse XML from bank API response")
+			return err
 		} else {
 			zlog.Error().Err(err)
+			return err
 		}
 	}
 
@@ -47,27 +53,33 @@ func AddRatesToDB() {
 	if err != nil {
 		if err == customError.MissingRates() {
 			zlog.Error().Err(err)
+			return err
 		} else if err == customError.ParsingError() {
 			zlog.Error().Err(err).Msg("Failed to parse string array into ResponseData struct")
+			return err
 		}
 	}
 
-	query, err := CreateQuery(rates)
+	query, err := db.CreateQuery(rates)
 
 	if err != nil {
 		zlog.Error().Err(err).Msg("Failed to create query")
+		return err
 	}
 
-	_, err = Initialization.Db.Exec(query)
+	_, err = db.Database.Exec(query)
 
 	if err != nil {
 		zlog.Error().Err(err).Msg("Failed to insert new rates into database")
+		return err
 	}
+
+	return nil
 }
 
-func CreateQuery(rates dataModules.ResponseData) (string, error) {
+func (db Database) CreateQuery(rates dataModules.ResponseData) (string, error) {
 	var query string
-	rowExists, err := rowExists("SELECT id FROM rates WHERE pubDate=$1", rates.PubDate)
+	rowExists, err := db.rowExists("SELECT id FROM rates WHERE pubDate=$1", rates.PubDate)
 	if err != nil {
 		return query, err
 	}
@@ -83,10 +95,10 @@ func CreateQuery(rates dataModules.ResponseData) (string, error) {
 	return query, nil
 }
 
-func rowExists(query string, args ...interface{}) (bool, error) {
+func (db Database) rowExists(query string, args ...interface{}) (bool, error) {
 	var exists bool
 	query = fmt.Sprintf("SELECT exists (%s)", query)
-	err := Initialization.Db.QueryRow(query, args...).Scan(&exists)
+	err := db.Database.QueryRow(query, args...).Scan(&exists)
 	if err != nil && err != sql.ErrNoRows {
 		return false, err
 	}

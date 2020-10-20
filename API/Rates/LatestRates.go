@@ -3,15 +3,14 @@ package Rates
 import (
 	"encoding/json"
 	zlog "github.com/rs/zerolog/log"
-	"goTestProj/API/Initialization"
 	dataModules "goTestProj/DataModules"
 	customError "goTestProj/Error"
 	"net/http"
 	"time"
 )
 
-func RespondWithLatestRates(w http.ResponseWriter, r *http.Request) {
-	rates, err := getLatestRates()
+func (db Database) RespondWithLatestRates(w http.ResponseWriter, r *http.Request) {
+	rates, err := db.getLatestRates()
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -25,15 +24,15 @@ func RespondWithLatestRates(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(rates)
 }
 
-func getLatestRates() (dataModules.ResponseData, error) {
+func (db Database) getLatestRates() (dataModules.ResponseData, error) {
 	var data dataModules.ResponseData
 
-	newestDataDateString, err := getLatestEntryDateString()
+	newestDataDateString, err := db.getLatestEntryDateString()
 	if err != nil {
 		return data, err
 	}
 
-	rows, err := Initialization.Db.Query("SELECT currency, rate FROM RATES WHERE pubdate=$1", newestDataDateString)
+	rows, err := db.Database.Query("SELECT currency, rate FROM RATES WHERE pubdate=$1", newestDataDateString)
 
 	if err != nil {
 		return data, err
@@ -52,9 +51,9 @@ func getLatestRates() (dataModules.ResponseData, error) {
 	return data, nil
 }
 
-func getLatestEntryDateString() (string, error) {
+func (db Database) getLatestEntryDateString() (string, error) {
 	var response dataModules.ResponseData
-	err := Initialization.Db.QueryRow("SELECT max(pubdate) FROM rates").Scan(&response.PubDate)
+	err := db.Database.QueryRow("SELECT max(pubdate) FROM rates").Scan(&response.PubDate)
 	if err != nil {
 		return "", err
 	}
