@@ -1,6 +1,7 @@
-package API
+package Tasks
 
 import (
+	"goTestProj/API/SaveData"
 	"time"
 )
 
@@ -13,7 +14,7 @@ func getTickerTime() time.Duration {
 	return startTime.Sub(currentTime)
 }
 
-func setTaskForAddingRates() {
+func SetTaskForAddingRates() {
 	// šeit varēji inicializēt tickeri ar argumentu 24*time.Hour + time.Minute
 	ticker := time.NewTicker(getTickerTime()).C
 
@@ -23,7 +24,7 @@ func setTaskForAddingRates() {
 			// Šis tickers turpinās tikšķēt ad infinitum ar norādīto laika periodu,
 			// tas nav metams ārā pēc viena tikšķa.
 			ticker = time.NewTicker(getTickerTime()).C
-			AddRatesToDB()
+			SaveData.AddRatesToDB()
 		}
 	}
 }

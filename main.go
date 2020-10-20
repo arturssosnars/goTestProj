@@ -5,9 +5,9 @@
 package main
 
 import (
-	"goTestProj/API"
+	"goTestProj/API/Initialization"
 )
 
 func main() {
-	API.Initialize()
+	Initialization.Initialize()
 }

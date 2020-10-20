@@ -1,12 +1,16 @@
-package API
+package Initialization
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/lib/pq"
+	zlog "github.com/rs/zerolog/log"
+	rates "goTestProj/API/Rates"
+	"goTestProj/API/SaveData"
+	"goTestProj/Tasks"
 	"log"
 	"net/http"
-	"fmt"
 )
 
 // globāli mainīgie nav laba prakse, bet to noteikti zināji :)
@@ -31,27 +35,51 @@ func Initialize() {
 	pgUrl, err := pq.ParseURL("postgres://pxjcqhji:MPY070OmuT4xUosjTGTWaHGH3jHCqJOY@hattie.db.elephantsql.com:5432/pxjcqhji")
 
 	// skatīt komentārus pie funkcijas definīcijas
-	LogErrorIfNeeded(err)
+	if err != nil {
+		zlog.Error().Err(err).
+			Str("type", "postgres").
+			Str("url", "MPY070OmuT4xUosjTGTWaHGH3jHCqJOY@hattie.db.elephantsql.com").
+			Str("port", "5432").
+			Str("db", "pxjcqhji").
+			Msg("Failed to parse database URL")
+	}
 
 	Db, err = sql.Open("postgres", pgUrl)
-	LogErrorIfNeeded(err)
+
+	if err != nil {
+		zlog.Error().Err(err).
+			Str("driverName", "postgres").
+			Str("type", "postgres").
+			Str("url", "MPY070OmuT4xUosjTGTWaHGH3jHCqJOY@hattie.db.elephantsql.com").
+			Str("port", "5432").
+			Str("db", "pxjcqhji").
+			Msg("Failed to open database")
+	}
 
 	err = Db.Ping()
-	LogErrorIfNeeded(err)
+	if err != nil {
+		zlog.Error().Err(err).
+			Str("driverName", "postgres").
+			Str("type", "postgres").
+			Str("url", "MPY070OmuT4xUosjTGTWaHGH3jHCqJOY@hattie.db.elephantsql.com").
+			Str("port", "5432").
+			Str("db", "pxjcqhji").
+			Msg("Failed to verify connection with database")
+	}
 
 	// Redzu, ka pirms servera uzstartēšanas, tu veic valūtas kursa vērtību sinhronizāciju, nevis realizē to kā
 	// atsevišķu CLI komandu. Nekas, ar šo tiksim galā :)
 	// Problēma ar šo pieeju ir tāda, ka, gadījumā, ja latvijas bankas rss feeds ir down, serveri nav iespējams uzstartēt.
-	AddRatesToDB()
+	SaveData.AddRatesToDB()
 
 	router := chi.NewRouter()
-	router.HandleFunc("/all", respondWithNewestRates)
-	router.HandleFunc("/single", respondWithHistoricalData)
+	router.HandleFunc("/all", rates.RespondWithLatestRates)
+	router.HandleFunc("/single", rates.RespondWithHistoricalData)
 
 	log.Println("set timers for tasks")
 
 	// skatīt komentāru pie funkcijas
-	go setTaskForAddingRates()
+	go Tasks.SetTaskForAddingRates()
 
 	// hardkodēts ports
 	log.Println("Listen to port :8000...")

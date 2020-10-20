@@ -1,6 +1,12 @@
 package DataModules
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+	"strconv"
+	"strings"
+	"time"
+	customError "goTestProj/Error"
+)
 
 // 1. Mums neinteresē visi lauki, kas tiek atgriezti šajā XML, tikai publikācijas datums un kursu strings.
 // 2. Mums interesējošai apakšstruktūrai `Item` var definēt atsevišķu struktu.
@@ -59,4 +65,53 @@ type Rss struct {
 			PubDate     string `xml:"pubDate"`
 		} `xml:"item"`
 	} `xml:"channel"`
+}
+
+func (rss Rss) LatestRates() (ResponseData, error) {
+	var data ResponseData
+	index := len(rss.Channel.Item) - 1
+	if rss.Channel.Item[index].Description == "" {
+		err := customError.MissingRates()
+		return data, err
+	}
+
+	// būtu jauki, ja mēs varētu vienkārši paprasīt bankData.Channel.Item.Rates(),
+	// un tas atgrieztu slice ar kursu vērtību structiem
+	rawRatesArray := strings.Split(rss.Channel.Item[index].Description, " ")
+
+	data = parseXmlToStruct(rawRatesArray[:len(rawRatesArray)-1], rss, index)
+	if len(data.Rates) == 0 {
+		err := customError.ParsingError()
+		return data, err
+	}
+	return data, nil
+}
+
+// Tā vietā, lai veiktu darbības ar RSS struktu šeit, var definēt receiver metodes, lai mēs pašam struktam varētu pajautāt
+// Rates un formatētu PubDate.
+// Skatīt komentārus rss.go failā
+func parseXmlToStruct(rawRatesArray []string, bankData Rss, index int) ResponseData {
+	rates := ResponseData{}
+	layout := "Mon, 02 Jan 2006 03:04:05 -0700"
+	str := bankData.Channel.Item[index].PubDate
+	t, err := time.Parse(layout, str)
+
+	if err != nil {
+		rates.PubDate = str
+	} else {
+		date := t.Format("2006-01-02")
+		rates.PubDate = date
+	}
+
+	for i := 0; i < (len(rawRatesArray) - 2); i += 2 {
+		if floatRate, err := strconv.ParseFloat(rawRatesArray[i+1], 64); err == nil {
+			rates.Rates = append(rates.Rates, Rates{
+				Currency: rawRatesArray[i],
+				Rate:     floatRate,
+			})
+		}
+		continue
+	}
+
+	return rates
 }
