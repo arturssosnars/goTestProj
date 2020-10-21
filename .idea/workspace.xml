@@ -10,11 +10,33 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b1cedbe8-9790-4e92-a902-9433b4cf1401" name="Default Changelist" comment="" />
+    <list default="true" id="b1cedbe8-9790-4e92-a902-9433b4cf1401" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/Config/config.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Config/config.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Config/configModules.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/Initialization/initialize.go" beforeDir="false" afterPath="$PROJECT_DIR$/API/Initialization/initialize.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/Rates/HistoricalRates.go" beforeDir="false" afterPath="$PROJECT_DIR$/API/Rates/HistoricalRates.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/Rates/LatestRates.go" beforeDir="false" afterPath="$PROJECT_DIR$/API/Rates/LatestRates.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/API/SaveData/saveData.go" beforeDir="false" afterPath="$PROJECT_DIR$/API/SaveData/saveData.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DataModules/Rates.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tasks/tasks.go" beforeDir="false" afterPath="$PROJECT_DIR$/Tasks/tasks.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+        <option value="tsconfig.json" />
+        <option value="Go File" />
+      </list>
+    </option>
   </component>
   <component name="GOROOT" path="/usr/local/go" />
   <component name="Git.Settings">
@@ -29,12 +51,24 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="DefaultGoTemplateProperty" value="Go File" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Config" />
+      <recent name="$PROJECT_DIR$/DB" />
+      <recent name="$PROJECT_DIR$/API/Initialization" />
+      <recent name="$PROJECT_DIR$/Tasks" />
+      <recent name="$PROJECT_DIR$/API/Rates" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration name="go build goTestProj" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
@@ -71,21 +105,41 @@
     <integration-enabled>true</integration-enabled>
   </component>
   <component name="WindowStateProjectService">
-    <state width="1750" height="280" key="GridCell.Tab.0.bottom" timestamp="1603053425745">
+    <state width="1750" height="108" key="GridCell.Tab.0.bottom" timestamp="1603207371606">
+      <screen x="0" y="23" width="1792" height="1030" />
+    </state>
+    <state width="1750" height="280" key="GridCell.Tab.0.bottom/0.23.1792.1026@0.23.1792.1026" timestamp="1603105096495" />
+    <state width="1750" height="108" key="GridCell.Tab.0.bottom/0.23.1792.1028@0.23.1792.1028" timestamp="1603200501722" />
+    <state width="1750" height="108" key="GridCell.Tab.0.bottom/0.23.1792.1030@0.23.1792.1030" timestamp="1603207371606" />
+    <state width="1750" height="108" key="GridCell.Tab.0.center" timestamp="1603207371604">
+      <screen x="0" y="23" width="1792" height="1030" />
+    </state>
+    <state width="1750" height="280" key="GridCell.Tab.0.center/0.23.1792.1026@0.23.1792.1026" timestamp="1603105096495" />
+    <state width="1750" height="108" key="GridCell.Tab.0.center/0.23.1792.1028@0.23.1792.1028" timestamp="1603200501721" />
+    <state width="1750" height="108" key="GridCell.Tab.0.center/0.23.1792.1030@0.23.1792.1030" timestamp="1603207371604" />
+    <state width="1750" height="108" key="GridCell.Tab.0.left" timestamp="1603207371603">
+      <screen x="0" y="23" width="1792" height="1030" />
+    </state>
+    <state width="1750" height="280" key="GridCell.Tab.0.left/0.23.1792.1026@0.23.1792.1026" timestamp="1603105096495" />
+    <state width="1750" height="108" key="GridCell.Tab.0.left/0.23.1792.1028@0.23.1792.1028" timestamp="1603200501721" />
+    <state width="1750" height="108" key="GridCell.Tab.0.left/0.23.1792.1030@0.23.1792.1030" timestamp="1603207371603" />
+    <state width="1750" height="108" key="GridCell.Tab.0.right" timestamp="1603207371604">
+      <screen x="0" y="23" width="1792" height="1030" />
+    </state>
+    <state width="1750" height="280" key="GridCell.Tab.0.right/0.23.1792.1026@0.23.1792.1026" timestamp="1603105096495" />
+    <state width="1750" height="108" key="GridCell.Tab.0.right/0.23.1792.1028@0.23.1792.1028" timestamp="1603200501722" />
+    <state width="1750" height="108" key="GridCell.Tab.0.right/0.23.1792.1030@0.23.1792.1030" timestamp="1603207371604" />
+    <state x="694" y="457" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1603112118767">
       <screen x="0" y="23" width="1792" height="1028" />
     </state>
-    <state width="1750" height="280" key="GridCell.Tab.0.bottom/0.23.1792.1028@0.23.1792.1028" timestamp="1603053425745" />
-    <state width="1750" height="280" key="GridCell.Tab.0.center" timestamp="1603053425744">
+    <state x="694" y="457" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1792.1028@0.23.1792.1028" timestamp="1603112118767" />
+    <state x="597" y="125" width="598" height="822" key="find.popup" timestamp="1603184759923">
       <screen x="0" y="23" width="1792" height="1028" />
     </state>
-    <state width="1750" height="280" key="GridCell.Tab.0.center/0.23.1792.1028@0.23.1792.1028" timestamp="1603053425744" />
-    <state width="1750" height="280" key="GridCell.Tab.0.left" timestamp="1603053425744">
-      <screen x="0" y="23" width="1792" height="1028" />
+    <state x="597" y="125" width="598" height="822" key="find.popup/0.23.1792.1028@0.23.1792.1028" timestamp="1603184759923" />
+    <state x="561" y="250" width="670" height="676" key="search.everywhere.popup" timestamp="1603201522845">
+      <screen x="0" y="23" width="1792" height="1031" />
     </state>
-    <state width="1750" height="280" key="GridCell.Tab.0.left/0.23.1792.1028@0.23.1792.1028" timestamp="1603053425744" />
-    <state width="1750" height="280" key="GridCell.Tab.0.right" timestamp="1603053425745">
-      <screen x="0" y="23" width="1792" height="1028" />
-    </state>
-    <state width="1750" height="280" key="GridCell.Tab.0.right/0.23.1792.1028@0.23.1792.1028" timestamp="1603053425745" />
+    <state x="561" y="250" width="670" height="676" key="search.everywhere.popup/0.23.1792.1031@0.23.1792.1031" timestamp="1603201522845" />
   </component>
 </project>
