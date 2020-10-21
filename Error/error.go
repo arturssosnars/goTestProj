@@ -1,25 +1,29 @@
-package Error
+package error
 
 import (
 	"errors"
 )
 
-var apiError = errors.New("Failed to get rates from bank API")
-var parseError = errors.New("Failed to parse data")
-var missingRates = errors.New("Rates are missing in RSS struct")
+var errAPI = errors.New("Failed to get rates from bank API")
+var errParse = errors.New("Failed to parse data")
+var errMissingRates = errors.New("Rates are missing in RSS struct")
 
+//MissingRates returns error for missing rates related issues
 func MissingRates() error {
-	return missingRates
+	return errMissingRates
 }
 
-func BankApiError() error {
-	return apiError
+//BankAPIError returns error for bank API related issues
+func BankAPIError() error {
+	return errAPI
 }
 
+//ParsingError returns error for parsing related issues
 func ParsingError() error {
-	return parseError
+	return errParse
 }
 
-type ErrorResponse struct {
+//JSONErrorResponse is used to form JSON to client with error message
+type JSONErrorResponse struct {
 	Message string `json:"message"`
 }

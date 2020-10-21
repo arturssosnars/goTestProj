@@ -1,16 +1,19 @@
-package Config
+package config
 
+//PostgresConfig holds PostgreSQL config
 type PostgresConfig struct {
 	Database string
-	Url string
+	URL string
 	Port string
 	Driver string
 }
 
-type HttpListening struct {
+//HTTPListening holds API port to listen through
+type HTTPListening struct {
 	Port string
 }
 
-type BankApi struct {
-	Url string
+//BankAPI holds bank API url
+type BankAPI struct {
+	URL string
 }

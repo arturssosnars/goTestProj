@@ -1,4 +1,4 @@
-package Rates
+package rates
 
 import (
 	"database/sql"
@@ -10,10 +10,12 @@ import (
 	"time"
 )
 
+//Database struct is used to pass pointer to DB as receiver
 type Database struct {
 	Database *sql.DB
 }
 
+//RespondWithHistoricalData checks if DB has data for requested currency and responds with JSON if found
 func (db Database) RespondWithHistoricalData(w http.ResponseWriter, r *http.Request) {
 	currency := r.URL.Query().Get("currency")
 
@@ -26,7 +28,7 @@ func (db Database) RespondWithHistoricalData(w http.ResponseWriter, r *http.Requ
 		}
 		zlog.Error().Str("method", r.Method).Str("url", r.RequestURI).Msg(errorMessage)
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(customError.ErrorResponse{"Could not find rates requested currency"})
+		json.NewEncoder(w).Encode(customError.JSONErrorResponse{Message: "Could not find rates requested currency"})
 		return
 	}
 
@@ -35,7 +37,7 @@ func (db Database) RespondWithHistoricalData(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		zlog.Error().Err(err).Msg("Failed to get rates from database")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(customError.ErrorResponse{"Failed to get rates from database"})
+		json.NewEncoder(w).Encode(customError.JSONErrorResponse{Message: "Failed to get rates from database"})
 	}
 
 	if len(rates) > 0 {
@@ -46,7 +48,7 @@ func (db Database) RespondWithHistoricalData(w http.ResponseWriter, r *http.Requ
 		w.WriteHeader(http.StatusNotFound)
 		errorMessage := "Could not find requested currency " + currency
 		zlog.Error().Err(err).Str("method", r.Method).Str("url", r.RequestURI).Msg(errorMessage)
-		json.NewEncoder(w).Encode(customError.ErrorResponse{"Could not find rates requested currency"})
+		json.NewEncoder(w).Encode(customError.JSONErrorResponse{Message: "Could not find rates requested currency"})
 	}
 }
 
