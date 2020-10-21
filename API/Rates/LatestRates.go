@@ -17,6 +17,7 @@ func (db Database) RespondWithLatestRates(w http.ResponseWriter, r *http.Request
 		w.WriteHeader(http.StatusInternalServerError)
 		zlog.Error().Err(err).Msg("Failed to get rates from database")
 		json.NewEncoder(w).Encode(customError.JSONErrorResponse{Message: "Failed to get rates from database"})
+		// trūkst return, izprintēsies arī nākamais write uz w.
 	}
 
 	w.Header().Set("Content-Type", "application/json")

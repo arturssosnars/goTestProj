@@ -20,6 +20,11 @@ func Init() error {
 
 //Postgres returns PostgreSQL configuration
 func Postgres() PostgresConfig {
+	// 1. fmt.Sprintf šeit nav nepieciešams, lai dabūtu string vērtību. Iesaku iepazīties ar viper metodēm, kā dabūt
+	// atpakaļ string vērtību.
+
+	// 2. Šie variabļi, manuprāt, ir lieki, var vienkārši assignot uzreiz struct fieldā.
+	// Piemēram, PostgresConfig{URL: package.GetSomeString(), ...}
 	url := fmt.Sprintf("%v", viper.Get("database.url"))
 	database := fmt.Sprintf("%v", viper.Get("database.name"))
 	driver := fmt.Sprintf("%v", viper.Get("database.driver"))

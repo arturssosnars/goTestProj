@@ -10,6 +10,13 @@ import (
 	"time"
 )
 
+// Šis un LatestRates fails nujau ir labāks - handleri neizmanto kaut kādu globālu DB variabli, bet izmanto to
+// kā dependency.
+// Bet, varētu vēl labāk - rates.Database ir saplūduši 2 concerni - HTTP servēšana un DB loģika. Šī programma varētu
+// izskatīties tā, ka vienā package ir Repository strukts, kas realizē visus vaicājumus sevī saturošajai datubāzei ar
+// metodēm, kuras var izsaukt citas packages, kurām tas interesē. HTTP handlošanas loģiku var realizēt citā package, un
+// kā dependency izmantot šo Repository package.
+
 //Database struct is used to pass pointer to DB as receiver
 type Database struct {
 	Database *sql.DB
@@ -38,6 +45,7 @@ func (db Database) RespondWithHistoricalData(w http.ResponseWriter, r *http.Requ
 		zlog.Error().Err(err).Msg("Failed to get rates from database")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(customError.JSONErrorResponse{Message: "Failed to get rates from database"})
+		// trūkst return, izprintēsies arī nākamais write uz w.
 	}
 
 	if len(rates) > 0 {

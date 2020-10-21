@@ -1,5 +1,6 @@
 package datamodules
 
+// vajag sakārtot importu secību, vismaz goland tā saka
 import (
 	"encoding/xml"
 	"strconv"
@@ -11,6 +12,8 @@ import (
 //Rss is used to parse XML from bank API
 type Rss struct {
 	XMLName xml.Name `xml:"rss"`
+	// ja Channel ir pilnīgi lieks, un nepieciešams tikai, lai tiktu klāt pie Item,
+	//tad anotācijā var definēt []Item ar anotāciju `xml:"channel>item"`
 	Channel struct {
 		Item []Item `xml:"item"`
 	} `xml:"channel"`

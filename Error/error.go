@@ -8,6 +8,9 @@ var errAPI = errors.New("Failed to get rates from bank API")
 var errParse = errors.New("Failed to parse data")
 var errMissingRates = errors.New("Rates are missing in RSS struct")
 
+// Kāpēc ir nepieciešamas speciālas funkcijas, kas atgriež kļūdas?
+// Labāk padari kļūdas publiskas, un lieto tās, kur nepieciešamas.
+
 //MissingRates returns error for missing rates related issues
 func MissingRates() error {
 	return errMissingRates

@@ -11,11 +11,18 @@ import (
 	"net/http"
 )
 
+// Šis strukts ir mulsinošs. strukts ar nosaukumu Database, un ar pointeri uz DB konekciju liek man domāt,
+// ka šeit ir definētas visas data-access funkcijas, bet nē, te ir implementēts valūtas kursu imports.
+// Iesaku padomāt labāk pie nosaukumiem.
+
 //Database is used to pass pointer to DB as receiver
 type Database struct {
 	Database *sql.DB
 }
 
+// Package savedata zina, uz kurieni vajag veikt kādu pieprasījumu, lai saņemtu kaut kādu XML,
+// bet package dataModules zina, kāds formāts būs šim saņemtajam XML. Manuprāt visām zināšanām par RSS barotni
+// būtu jābūt vienā pakotnē.
 func getBankRates() (dataModules.Rss, error) {
 	var bankData dataModules.Rss
 	bankURL := config.Bank().URL
