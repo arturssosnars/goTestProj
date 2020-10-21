@@ -1,4 +1,4 @@
-package DataModules
+package datamodules
 
 import (
 	"encoding/xml"
@@ -8,65 +8,22 @@ import (
 	customError "goTestProj/Error"
 )
 
-// 1. Mums neinteresē visi lauki, kas tiek atgriezti šajā XML, tikai publikācijas datums un kursu strings.
-// 2. Mums interesējošai apakšstruktūrai `Item` var definēt atsevišķu struktu.
-//
-// type Item struct {
-//     RawRates string `xml:"description"`
-//     PubDate string `xml:"pubDate"`
-// }
-//
-// Ieguvums būtu tāds, ka mēs varētu definēt metodes uz šī strukta, kas atvieglotu ar šo struktu saistītas
-// datu apstrādes darbības, kas vairākās vietās tiek veiktas.
-//
-// func (i Item) PubDateTime() (time.Time, error) {
-//     t, err := time.Parse(i.PubDate)
-//     if err != nil {
-//         return nil, err
-//     }
-//     return t, nil
-// }
+//Rss is used to parse XML from bank API
 type Rss struct {
 	XMLName xml.Name `xml:"rss"`
-	Text    string   `xml:",chardata"`
-	Version string   `xml:"version,attr"`
-	Atom    string   `xml:"atom,attr"`
 	Channel struct {
-		Text        string `xml:",chardata"`
-		Title       string `xml:"title"`
-		Description string `xml:"description"`
-		Link        struct {
-			Text string `xml:",chardata"`
-			Rel  string `xml:"rel,attr"`
-			Type string `xml:"type,attr"`
-			Href string `xml:"href,attr"`
-		} `xml:"link"`
-		LastBuildDate string `xml:"lastBuildDate"`
-		Generator     string `xml:"generator"`
-		Image         struct {
-			Text   string `xml:",chardata"`
-			URL    string `xml:"url"`
-			Title  string `xml:"title"`
-			Link   string `xml:"link"`
-			Width  string `xml:"width"`
-			Height string `xml:"height"`
-		} `xml:"image"`
-		Language string `xml:"language"`
-		Ttl      string `xml:"ttl"`
-		Item     []struct {
-			Text  string `xml:",chardata"`
-			Title string `xml:"title"`
-			Link  string `xml:"link"`
-			Guid  struct {
-				Text        string `xml:",chardata"`
-				IsPermaLink string `xml:"isPermaLink,attr"`
-			} `xml:"guid"`
-			Description string `xml:"description"`
-			PubDate     string `xml:"pubDate"`
-		} `xml:"item"`
+		Item []Item `xml:"item"`
 	} `xml:"channel"`
 }
 
+//Item is used to parse XML from bank API
+//It holds rates for single day
+type Item struct {
+	Description string `xml:"description"`
+	PubDate     string `xml:"pubDate"`
+}
+
+//LatestRates returns JSON with latest rates
 func (rss Rss) LatestRates() (ResponseData, error) {
 	var data ResponseData
 	index := len(rss.Channel.Item) - 1
@@ -75,11 +32,11 @@ func (rss Rss) LatestRates() (ResponseData, error) {
 		return data, err
 	}
 
-	// būtu jauki, ja mēs varētu vienkārši paprasīt bankData.Channel.Item.Rates(),
-	// un tas atgrieztu slice ar kursu vērtību structiem
-	rawRatesArray := strings.Split(rss.Channel.Item[index].Description, " ")
+	item := rss.Channel.Item[index]
 
-	data = parseXmlToStruct(rawRatesArray[:len(rawRatesArray)-1], rss, index)
+	rawRatesArray := strings.Split(item.Description, " ")
+
+	data = parseSliceToStruct(rawRatesArray[:len(rawRatesArray)-1], item)
 	if len(data.Rates) == 0 {
 		err := customError.ParsingError()
 		return data, err
@@ -87,31 +44,46 @@ func (rss Rss) LatestRates() (ResponseData, error) {
 	return data, nil
 }
 
-// Tā vietā, lai veiktu darbības ar RSS struktu šeit, var definēt receiver metodes, lai mēs pašam struktam varētu pajautāt
-// Rates un formatētu PubDate.
-// Skatīt komentārus rss.go failā
-func parseXmlToStruct(rawRatesArray []string, bankData Rss, index int) ResponseData {
-	rates := ResponseData{}
+func (i Item) getPubDate() (time.Time, error) {
+	var pubTime time.Time
 	layout := "Mon, 02 Jan 2006 03:04:05 -0700"
-	str := bankData.Channel.Item[index].PubDate
-	t, err := time.Parse(layout, str)
-
+	pubTime, err := time.Parse(layout, i.PubDate)
 	if err != nil {
-		rates.PubDate = str
-	} else {
-		date := t.Format("2006-01-02")
-		rates.PubDate = date
+		return pubTime, err
 	}
+	return pubTime, nil
+}
 
-	for i := 0; i < (len(rawRatesArray) - 2); i += 2 {
-		if floatRate, err := strconv.ParseFloat(rawRatesArray[i+1], 64); err == nil {
-			rates.Rates = append(rates.Rates, Rates{
-				Currency: rawRatesArray[i],
+func (rss Rss) getLatestItem() Item {
+	index := len(rss.Channel.Item) - 1
+	return rss.Channel.Item[index]
+}
+
+func stringSlicetoResponseData(slice []string) []Rates {
+	var rates []Rates
+	for i := 0; i < len(slice); i += 2 {
+		if floatRate, err := strconv.ParseFloat(slice[i+1], 64); err == nil {
+			rates = append(rates, Rates{
+				Currency: slice[i],
 				Rate:     floatRate,
 			})
 		}
 		continue
 	}
+	return rates
+}
+
+func parseSliceToStruct(rawRatesArray []string, item Item) ResponseData {
+	rates := ResponseData{}
+	pubDate, err := item.getPubDate()
+	if err != nil {
+		rates.PubDate = item.PubDate
+	} else {
+		date := pubDate.Format("2006-01-02")
+		rates.PubDate = date
+	}
+
+	rates.Rates = stringSlicetoResponseData(rawRatesArray)
 
 	return rates
 }

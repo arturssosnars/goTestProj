@@ -1,4 +1,4 @@
-package Rates
+package rates
 
 import (
 	"encoding/json"
@@ -9,13 +9,14 @@ import (
 	"time"
 )
 
+//RespondWithLatestRates finds latest rates in DB and responds with them as JSON
 func (db Database) RespondWithLatestRates(w http.ResponseWriter, r *http.Request) {
 	rates, err := db.getLatestRates()
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		zlog.Error().Err(err).Msg("Failed to get rates from database")
-		json.NewEncoder(w).Encode(customError.ErrorResponse{"Failed to get rates from database"})
+		json.NewEncoder(w).Encode(customError.JSONErrorResponse{Message: "Failed to get rates from database"})
 	}
 
 	w.Header().Set("Content-Type", "application/json")

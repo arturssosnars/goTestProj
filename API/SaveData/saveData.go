@@ -1,4 +1,4 @@
-package SaveData
+package savedata
 
 import (
 	"database/sql"
@@ -11,17 +11,18 @@ import (
 	"net/http"
 )
 
+//Database is used to pass pointer to DB as receiver
 type Database struct {
 	Database *sql.DB
 }
 
-func GetBankRates() (dataModules.Rss, error) {
+func getBankRates() (dataModules.Rss, error) {
 	var bankData dataModules.Rss
-	bankUrl := config.Bank().Url
-	resp, err := http.Get(bankUrl)
+	bankURL := config.Bank().URL
+	resp, err := http.Get(bankURL)
 
 	if err != nil {
-		err = customError.BankApiError()
+		err = customError.BankAPIError()
 		return bankData, err
 	}
 
@@ -35,17 +36,17 @@ func GetBankRates() (dataModules.Rss, error) {
 	return bankData, nil
 }
 
+//AddRatesToDB requests latest rates, checks if DB has those rates already, if not - adds them to DB
 func (db Database) AddRatesToDB() error {
-	bankData, err := GetBankRates()
+	bankData, err := getBankRates()
 
 	if err != nil {
 		if err == customError.ParsingError() {
 			zlog.Error().Err(err).Msg("Failed to parse XML from bank API response")
 			return err
-		} else {
-			zlog.Error().Err(err)
-			return err
 		}
+		zlog.Error().Err(err)
+		return err
 	}
 
 	rates, err := bankData.LatestRates()
@@ -60,7 +61,7 @@ func (db Database) AddRatesToDB() error {
 		}
 	}
 
-	query, err := db.CreateQuery(rates)
+	query, err := db.createQuery(rates)
 
 	if err != nil {
 		zlog.Error().Err(err).Msg("Failed to create query")
@@ -77,7 +78,7 @@ func (db Database) AddRatesToDB() error {
 	return nil
 }
 
-func (db Database) CreateQuery(rates dataModules.ResponseData) (string, error) {
+func (db Database) createQuery(rates dataModules.ResponseData) (string, error) {
 	var query string
 	rowExists, err := db.rowExists("SELECT id FROM rates WHERE pubDate=$1", rates.PubDate)
 	if err != nil {

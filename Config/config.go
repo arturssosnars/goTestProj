@@ -1,10 +1,11 @@
-package Config
+package config
 
 import (
 	"fmt"
 	"github.com/spf13/viper"
 )
 
+//Init initializes project configuration
 func Init() error {
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
@@ -17,25 +18,28 @@ func Init() error {
 	return nil
 }
 
+//Postgres returns PostgreSQL configuration
 func Postgres() PostgresConfig {
 	url := fmt.Sprintf("%v", viper.Get("database.url"))
 	database := fmt.Sprintf("%v", viper.Get("database.name"))
 	driver := fmt.Sprintf("%v", viper.Get("database.driver"))
 	apiPort := fmt.Sprintf("%v", viper.Get("database.port"))
 	return PostgresConfig{
-		Url:      url,
+		URL:      url,
 		Port:     apiPort,
 		Driver:   driver,
 		Database: database,
 	}
 }
 
-func Bank() BankApi {
+//Bank returns bank api url
+func Bank() BankAPI {
 	api := fmt.Sprintf("%v", viper.Get("bankApi"))
-	return BankApi{api}
+	return BankAPI{api}
 }
 
-func Api() HttpListening {
+//API returns port for api to listen through
+func API() HTTPListening {
 	port := fmt.Sprintf("%v", viper.Get("apiPort"))
-	return HttpListening{port}
+	return HTTPListening{port}
 }

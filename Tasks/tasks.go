@@ -1,4 +1,4 @@
-package Tasks
+package tasks
 
 import (
 	"database/sql"
@@ -6,11 +6,12 @@ import (
 	"time"
 )
 
+//Database is used to pass pointer to DB as receiver
 type Database struct {
 	Database *sql.DB
 }
 
-// šī funkcija imo nav nepieciešama, jo tās rezultāts vienmēr būs 24h 1m
+//calculates time 1 minute past midnight UTC or 15 minutes from now
 func getTickerTime(retry bool) time.Duration {
 	currentTime := time.Now()
 	var startTime time.Time
@@ -25,15 +26,15 @@ func getTickerTime(retry bool) time.Duration {
 	return startTime.Sub(currentTime)
 }
 
+//SetTaskForAddingRates sets rates addition task depending with different timing
+//depending on success or fail of previous try
 func (db Database) SetTaskForAddingRates() {
 	ticker := time.NewTicker(getTickerTime(false))
 
 	for {
 		select {
 		case <-ticker.C:
-			// Šis tickers turpinās tikšķēt ad infinitum ar norādīto laika periodu,
-			// tas nav metams ārā pēc viena tikšķa.
-			var database = SaveData.Database{db.Database}
+			var database = savedata.Database{Database: db.Database}
 			err := database.AddRatesToDB()
 			if err != nil {
 				ticker.Reset(getTickerTime(true))
