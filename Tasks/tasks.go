@@ -2,7 +2,7 @@ package tasks
 
 import (
 	"database/sql"
-	"goTestProj/API/SaveData"
+	"goTestProj/Repository"
 	"time"
 )
 
@@ -34,8 +34,8 @@ func (db Database) SetTaskForAddingRates() {
 	for {
 		select {
 		case <-ticker.C:
-			var database = savedata.Database{Database: db.Database}
-			err := database.AddRatesToDB()
+			repo := repository.DataSource{Database: db.Database}
+			err := repo.AddRatesToDB()
 			if err != nil {
 				ticker.Reset(getTickerTime(true))
 			} else {

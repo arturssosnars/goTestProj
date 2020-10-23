@@ -1,12 +1,12 @@
-package datamodules
+package repository
 
 // vajag sakārtot importu secību, vismaz goland tā saka
 import (
 	"encoding/xml"
+	customError "goTestProj/Error"
 	"strconv"
 	"strings"
 	"time"
-	customError "goTestProj/Error"
 )
 
 //Rss is used to parse XML from bank API
@@ -62,7 +62,7 @@ func (rss Rss) getLatestItem() Item {
 	return rss.Channel.Item[index]
 }
 
-func stringSlicetoResponseData(slice []string) []Rates {
+func stringSliceToResponseData(slice []string) []Rates {
 	var rates []Rates
 	for i := 0; i < len(slice); i += 2 {
 		if floatRate, err := strconv.ParseFloat(slice[i+1], 64); err == nil {
@@ -86,7 +86,7 @@ func parseSliceToStruct(rawRatesArray []string, item Item) ResponseData {
 		rates.PubDate = date
 	}
 
-	rates.Rates = stringSlicetoResponseData(rawRatesArray)
+	rates.Rates = stringSliceToResponseData(rawRatesArray)
 
 	return rates
 }

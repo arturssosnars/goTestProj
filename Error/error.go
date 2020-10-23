@@ -5,8 +5,9 @@ import (
 )
 
 var errAPI = errors.New("Failed to get rates from bank API")
-var errParse = errors.New("Failed to parse data")
+var errParsing = errors.New("Failed to parse data")
 var errMissingRates = errors.New("Rates are missing in RSS struct")
+var errDatabaseQuery = errors.New("Failed to process SQL querry")
 
 // Kāpēc ir nepieciešamas speciālas funkcijas, kas atgriež kļūdas?
 // Labāk padari kļūdas publiskas, un lieto tās, kur nepieciešamas.
@@ -23,7 +24,12 @@ func BankAPIError() error {
 
 //ParsingError returns error for parsing related issues
 func ParsingError() error {
-	return errParse
+	return errParsing
+}
+
+//QueryError returns error for SQL query related issues
+func QueryError() error {
+	return errDatabaseQuery
 }
 
 //JSONErrorResponse is used to form JSON to client with error message

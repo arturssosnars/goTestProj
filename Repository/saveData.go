@@ -1,12 +1,12 @@
-package savedata
+package repository
 
 import (
 	"database/sql"
 	"encoding/xml"
 	"fmt"
+	"github.com/go-ping/ping"
 	zlog "github.com/rs/zerolog/log"
 	config "goTestProj/Config"
-	dataModules "goTestProj/DataModules"
 	customError "goTestProj/Error"
 	"net/http"
 )
@@ -15,20 +15,28 @@ import (
 // ka šeit ir definētas visas data-access funkcijas, bet nē, te ir implementēts valūtas kursu imports.
 // Iesaku padomāt labāk pie nosaukumiem.
 
-//Database is used to pass pointer to DB as receiver
-type Database struct {
-	Database *sql.DB
-}
-
 // Package savedata zina, uz kurieni vajag veikt kādu pieprasījumu, lai saņemtu kaut kādu XML,
 // bet package dataModules zina, kāds formāts būs šim saņemtajam XML. Manuprāt visām zināšanām par RSS barotni
 // būtu jābūt vienā pakotnē.
-func getBankRates() (dataModules.Rss, error) {
-	var bankData dataModules.Rss
+func getBankRates() (Rss, error) {
+	var bankData Rss
 	bankURL := config.Bank().URL
 	resp, err := http.Get(bankURL)
 
 	if err != nil {
+		pinger, err2 := ping.NewPinger(bankURL)
+		if err2 != nil {
+			zlog.Error().Err(err2)
+		} else {
+			pinger.Count = 5
+			pinger.OnFinish = func(stats *ping.Statistics) {
+				if stats.PacketLoss > 50 {
+					zlog.Fatal().Msg(fmt.Sprintf("Bad or no connection to bank API. Ping result: %v percent lost", stats.PacketLoss))
+				}
+			}
+			pinger.Run()
+		}
+
 		err = customError.BankAPIError()
 		return bankData, err
 	}
@@ -44,7 +52,7 @@ func getBankRates() (dataModules.Rss, error) {
 }
 
 //AddRatesToDB requests latest rates, checks if DB has those rates already, if not - adds them to DB
-func (db Database) AddRatesToDB() error {
+func (db DataSource) AddRatesToDB() error {
 	bankData, err := getBankRates()
 
 	if err != nil {
@@ -85,7 +93,7 @@ func (db Database) AddRatesToDB() error {
 	return nil
 }
 
-func (db Database) createQuery(rates dataModules.ResponseData) (string, error) {
+func (db DataSource) createQuery(rates ResponseData) (string, error) {
 	var query string
 	rowExists, err := db.rowExists("SELECT id FROM rates WHERE pubDate=$1", rates.PubDate)
 	if err != nil {
@@ -103,7 +111,7 @@ func (db Database) createQuery(rates dataModules.ResponseData) (string, error) {
 	return query, nil
 }
 
-func (db Database) rowExists(query string, args ...interface{}) (bool, error) {
+func (db DataSource) rowExists(query string, args ...interface{}) (bool, error) {
 	var exists bool
 	query = fmt.Sprintf("SELECT exists (%s)", query)
 	err := db.Database.QueryRow(query, args...).Scan(&exists)

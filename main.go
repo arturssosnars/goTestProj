@@ -1,9 +1,9 @@
 package main
 
 import (
-	"goTestProj/API/Initialization"
+	"goTestProj/API"
 )
 
 func main() {
-	initialization.Initialize()
+	api.InitializeDB().SetListeners()
 }
